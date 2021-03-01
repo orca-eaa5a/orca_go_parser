@@ -1,11 +1,13 @@
+import idautils
+import idc
+import idaapi
+
 from ctypes import *
 import struct
 import ctypes
 import common
+import utils
 from go_structure import *
-import idautils
-import idc
-import idaapi
 
 import log
 
@@ -87,9 +89,6 @@ def parse__func(pMem):
 
     return _func_strt
 
-    
-    
-
 def parse_pclntable(module_data):
     pPcHeader = module_data.pPcHeader
     pc_header = parse_pc_header(pMem=pPcHeader)
@@ -123,7 +122,7 @@ def parse_pclntable(module_data):
         func_name_addr = module_data.pFuncNameTable + _func.nameoff
         func_name = idc.GetString(func_name_addr)
         if func_name:
-            clean_func_name = common.clean_function_name(func_name)
+            clean_func_name = utils.clean_function_name(func_name)
             log._info("@0x%x Name : [%s]" % (func_rva, func_name))
             idc.MakeComm(func_rva, "@0x"+str(hex(func_rva))+" entry")
             idaapi.autoWait()
@@ -140,6 +139,3 @@ def parse_pclntable(module_data):
                 log._info("@0x%x Name : [%s]" % (func_rva, func_name))
             else:
                 log._error("@0x%x Name : [%s] Failed..." % (func_rva, func_name))
-
-
-

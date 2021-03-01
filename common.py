@@ -26,12 +26,6 @@ def get_segment_by_name(seg_name):
         return seg
     return None
 
-def get_segment_addr_from_rdata(name):
-    for ea, seg_name in idautils.Names():
-        if seg_name == name:
-            return ea
-    return 0
-
 def get_segment_addr_by_name(name):
     seg_start_addr = 0
 
@@ -54,9 +48,6 @@ def get_segment_addr_by_name(name):
 
     return seg_start_addr
 
-def get_next_segment_addr(addr):
-    return idaapi.get_next_seg(addr).start_ea
-
 def check_is_stripped():
     # go compiler can remove it's symbol
     # go build -ldflags "-s -w"
@@ -68,19 +59,13 @@ def check_is_stripped():
         return True
     return False # not stripped
 
-# Reference go_parser # common.clean_function_name
-def clean_function_name(name_str):
-    '''
-    Clean generic 'bad' characters
-    '''
-    name_str = filter(lambda x: x in string.printable, name_str)
-    STRIP_CHARS = [ '(', ')', '[', ']', '{', '}', ' ', '"' ]
-    REPLACE_CHARS = ['.', '*', '-', ',', ';', ':', '/', '\xb7' ]
+def get_funcRVA_by_name(name):
+    for section in idautils.Segments():
+        for func_rva in idautils.Functions(section, idc.SegEnd(section)):
+            if name == idaapi.get_func_name(func_rva):
+                return idaapi.get_func(func_rva)
     
-    for c in STRIP_CHARS:
-        name_str = name_str.replace(c, '')
+    return None
 
-    for c in REPLACE_CHARS:
-        name_str = name_str.replace(c, '_')
-
-    return name_str
+def get_next_segment_addr(addr):
+    return idaapi.get_next_seg(addr).start_ea
